@@ -157,13 +157,6 @@ def findcall(symbol):
     call = pwngdb.searchcall(symbol)
     print(call) if call != -1 else print("symbol not found")
 
-
-@pwndbg.commands.ArgparsedCommand("Print the GOT table by objdump.")
-@pwndbg.commands.OnlyWithFile
-def objdump_got():
-    cmd = "objdump -R {} {}".format("--demangle" if pwngdb.iscplus() else "", pwndbg.proc.exe)
-    print(subprocess.check_output(cmd, shell=True)[:-2].decode("utf8").strip())
-
 @pwndbg.commands.ArgparsedCommand("Print dynamic section.")
 @pwndbg.commands.OnlyWithFile
 def dyn():

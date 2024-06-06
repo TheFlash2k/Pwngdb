@@ -78,14 +78,6 @@ class PwnCmd(object):
         codebs = codeaddr()[0]
         print("\033[34m" + "codebase : " + "\033[37m" + hex(codebs))
 
-    def tls(self):
-        """ Get tls base """
-        print("\033[34m" + "tls : " + "\033[37m" + hex(gettls()))
-
-    def canary(self):
-        """ Get canary value """
-        print("\033[34m" + "canary : " + "\033[37m" + hex(getcanary()))
-
     def fmtarg(self,*arg):
         (addr,) = normalize_argv(arg,1)
         getfmtarg(addr)
@@ -159,33 +151,12 @@ class PwnCmd(object):
         else :
             print("error")
 
-    def got(self):
-        """ Print the got table """
-        processname = getprocname()
-        if processname :
-            cmd = "objdump -R "
-            if iscplus :
-                cmd += "--demangle "
-            cmd += "\"" + processname + "\""
-            got = subprocess.check_output(cmd,shell=True)[:-2].decode('utf8')
-            print(got)
-        else :
-            print("No current process or executable file specified." )
-
     def dyn(self):
         """ Print dynamic section """
         processname = getprocname()
         if processname :
             dyn = subprocess.check_output("readelf -d \"" + processname + "\"",shell=True).decode('utf8')
             print(dyn)
-        else :
-            print("No current process or executable file specified." )
-
-    def rop(self):
-        """ ROPgadget """
-        procname = getprocname()
-        if procname :
-            subprocess.call("ROPgadget --binary \"" + procname +"\"",shell=True)
         else :
             print("No current process or executable file specified." )
 
@@ -460,20 +431,6 @@ def gettls():
         data = gdb.execute("x/xg $rsp-8",to_string=True)
         return int(data.split(":")[1].strip(),16)
     else:
-        return "error"
-
-def getcanary():
-    arch = getarch()
-    tlsaddr = gettls()
-    if arch == "i386" :
-        offset = 0x14
-        result = gdb.execute("x/xw " + hex(tlsaddr + offset),to_string=True).split(":")[1].strip()
-        return int(result ,16)   
-    elif arch == "x86-64" :
-        offset = 0x28
-        result = gdb.execute("x/xg " + hex(tlsaddr + offset),to_string=True).split(":")[1].strip()
-        return int(result,16)
-    else :
         return "error"
 
 def getoff(sym):
